@@ -1,0 +1,7 @@
+/auto-save-list/
+*.el~
+/elpa/
+/eshell/
+/recentf.eld
+/tramp
+/transient/
