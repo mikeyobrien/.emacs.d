@@ -1,5 +1,10 @@
 ;; -*- lexical-binding: t; -*-
+(add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
+
+
 (require 'package)
+(require 'init-utils)
+(require 'init-org)
 
 (which-key-mode 1)
  
@@ -25,9 +30,8 @@
 (when (memq window-system '(mac ns x))
   (exec-path-from-shell-initialize))
 
-(use-package disable-mouse
-  :init
-  (global-disable-mouse-mode))
+(use-package disable-mouse)
+  
 
 (define-prefix-command 'emacs-map)
 (global-set-key (kbd "C-c q") 'emacs-map)
@@ -71,6 +75,10 @@
    ("M-.". embark-dwim)
    ("C-,". embark-act-all)))
 
+(use-package projectile
+  :ensure t
+  :bind
+  ("C-c p" . 'projectile-command-map))
 
 (use-package magit
   :bind
@@ -89,11 +97,13 @@
   :init
   (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode)))
 
-(set-face-attribute 'default nil :height 200)
+(set-face-attribute 'default nil :height 150)
 
 (global-set-key (kbd "M-o") 'other-window)
 
-(use-package eat)
+(use-package eat
+  :bind
+  ("C-c t" . eat))
 
 (use-package treesit-auto
   :custom
@@ -115,10 +125,71 @@
 (add-hook 'typescript-mode-hook 'eglot-ensure)
 
 
-  
-  
+    
 (setq display-buffer-alist
       '(("*Python*"
          (display-buffer-reuse-window
           display-buffer-at-bottom)
          (window-height . 0.3))))
+
+(use-package ace-window
+  :ensure t
+  :bind
+  ("M-o" . ace-window)
+  :config
+  (setq aw-keys '(?a ?s ?d ?f ?j ?k ?l)))
+
+
+(use-package gptel
+  :init
+  (setq gptel-model 'claude-sonnet-4-20250514
+        gptel-backend (gptel-make-bedrock "AWS"
+                        :stream t
+                        :region "us-west-2"
+                        :models '(claude-sonnet-4-20250514)
+                        :model-region 'us)
+        gptel-default-mode 'markdown-mode)
+
+
+  :bind
+  (("C-c l l" . gptel)
+   ("C-c l r" . gptel-rewrite)
+   ("C-c l m" . gptel-menu))
+
+  :config
+  (require 'gptel-integrations)
+  (add-hook 'buffer-list-update-hook
+            (lambda ()
+              (when (string= (buffer-name) "*AWS*")
+                (markdown-mode))))
+
+  (add-hook 'gptel-mode-hook
+            (lambda ()
+              (setenv "AWS_PROFILE" "cline")))
+
+  (add-hook 'gptel-post-stream-hook 'gptel-auto-scroll)
+  (add-hook 'gptel-post-response-functions 'gptel-end-of-response))
+
+(use-package mcp
+  :ensure t
+  :after gptel
+  :custom (mcp-hub-servers
+           `(("filesystem" . (:command "npx" :args ("-y" "@modelcontextprotocol/server-filesystem" "/Users/mobrienv/workplace/")))
+             ("fetch" . (:command "uvx" :args ("mcp-server-fetch")))))	
+  :config
+  (require 'mcp-hub)
+  :hook (after-init . mcp-hub-start-all-server))
+
+
+
+
+(use-package gptel-commit
+  :after gptel
+  :bind (:map magit-status-mode-map
+              ("C-c c" . gptel-commit-generate)))
+
+(use-package markdown-mode
+  :ensure t
+  :config
+  (add-hook 'markdown-mode-hook #'gptel-mode))
+    
