@@ -1,5 +1,6 @@
 /auto-save-list/
 *.el~
+*.elc
 /elpa/
 /eshell/
 /recentf.eld
@@ -11,4 +12,10 @@
 /eln-cache/
 /backups/
 /auto-saves/
-/lisp/
+/compiled/
+
+# Work-specific files
+init-work.el
+machine-config.el
+*.eld
+/recentf
