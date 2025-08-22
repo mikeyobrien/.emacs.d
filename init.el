@@ -19,10 +19,10 @@
 (require 'init-completion)
 (require 'init-project)
 (require 'init-programming)
-(require 'init-ai)
 (require 'init-misc)
 (require 'init-keybindings)
 (require 'init-android)
+(require 'init-ai)
 
 ;; Testing
 (defun meow-setup ()
@@ -32,6 +32,9 @@
    '("k" . meow-prev)
    '("<escape>" . ignore))
   (meow-leader-define-key
+   ;; SPC j/k will run the original command in MOTION state.
+   '("j" . "H-j")
+   '("k" . "H-k")
    ;; Use SPC (0-9) for digit arguments.
    '("1" . meow-digit-argument)
    '("2" . meow-digit-argument)
@@ -113,7 +116,6 @@
   :config
   (meow-setup)
   (meow-global-mode 1))
-
 
 ;; Load work configuration if on work machine
 (when (and (file-exists-p (expand-file-name "machine-config.el" user-emacs-directory))

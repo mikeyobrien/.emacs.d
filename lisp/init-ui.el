@@ -15,12 +15,40 @@
   :init
   (doom-modeline-mode))
 
-;; Font size
-(set-face-attribute 'default nil :height 150)
+;; Font configuration
+(defun setup-fonts ()
+  "Set up fonts, preferring Fira Code Nerd Font if available."
+  (let ((font-height 150))
+    (cond
+     ;; Check for Fira Code Nerd Font
+     ((find-font (font-spec :name "FiraCode Nerd Font"))
+      (set-face-attribute 'default nil
+                          :font "FiraCode Nerd Font"
+                          :height font-height)
+      (message "Using FiraCode Nerd Font"))
+     ;; Fallback to regular Fira Code
+     ((find-font (font-spec :name "Fira Code"))
+      (set-face-attribute 'default nil
+                          :font "Fira Code"
+                          :height font-height)
+      (message "Using Fira Code"))
+     ;; Default fallback
+     (t
+      (set-face-attribute 'default nil :height font-height)
+      (message "Fira Code fonts not found, using default font")))))
+
+;; Apply font settings
+(setup-fonts)
+
+;; Enable ligatures for Fira Code if available
+(when (and (fboundp 'mac-auto-operator-composition-mode)
+           (member "FiraCode Nerd Font" (font-family-list)))
+  (mac-auto-operator-composition-mode t))
 
 ;; Simplified interface
 (menu-bar-mode -1)
 (tool-bar-mode -1)
+
 
 (setq ring-bell-function 'ignore)
   
@@ -31,7 +59,6 @@
   ("M-o" . ace-window)
   :config
   (setq aw-keys '(?a ?s ?d ?f ?j ?k ?l)))
-
 ;; Buffer display rules
 (setq display-buffer-alist
       '(("*Python*"
