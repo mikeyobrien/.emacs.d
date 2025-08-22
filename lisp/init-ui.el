@@ -9,11 +9,12 @@
 (use-package doom-themes
   :config
   (load-theme 'doom-one t))
-
+(use-package all-the-icons
+  :ensure t)
 (use-package nerd-icons)
 (use-package doom-modeline
   :init
-  (doom-modeline-mode))
+  (doom-modeline-mode 1))
 
 ;; Font configuration
 (defun setup-fonts ()
@@ -25,8 +26,14 @@
       (set-face-attribute 'default nil
                           :font "FiraCode Nerd Font"
                           :height font-height)
+      (set-fontset-font t 'symbol "FiraCode Nerd Font" nil 'prepend)
       (message "Using FiraCode Nerd Font"))
-     ;; Fallback to regular Fira Code((find-font (font-spec :name "Fira Code"))
+     ;; Fallback to regular Fira Code
+     ((find-font (font-spec :name "Fira Code"))
+      (set-face-attribute 'default nil
+                          :font "Fira Code"
+                          :height font-height)
+      (message "Using Fira Code"))
      (t
       (set-face-attribute 'default nil :height font-height)
       (message "Fira Code fonts not found, using default font")))))

@@ -28,10 +28,8 @@
 
 
 ;; Load work configuration if on work machine
-(when (and (file-exists-p (expand-file-name "machine-config.el" user-emacs-directory))
-           (progn (require 'machine-config nil t)
-                  (bound-and-true-p is-work-machine)))
-  (require 'init-work)
+(when (and (file-exists-p (expand-file-name "machine-config.el" user-emacs-directory)))
+           (require 'init-work) 
   (message "Work configuration loaded"))
 
 ;;; init.el ends here
