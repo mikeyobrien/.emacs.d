@@ -26,13 +26,7 @@
                           :font "FiraCode Nerd Font"
                           :height font-height)
       (message "Using FiraCode Nerd Font"))
-     ;; Fallback to regular Fira Code
-     ((find-font (font-spec :name "Fira Code"))
-      (set-face-attribute 'default nil
-                          :font "Fira Code"
-                          :height font-height)
-      (message "Using Fira Code"))
-     ;; Default fallback
+     ;; Fallback to regular Fira Code((find-font (font-spec :name "Fira Code"))
      (t
       (set-face-attribute 'default nil :height font-height)
       (message "Fira Code fonts not found, using default font")))))
