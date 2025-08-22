@@ -19,3 +19,6 @@ init-work.el
 machine-config.el
 *.eld
 /recentf
+
+# Custom Emacs configuration
+custom.el
