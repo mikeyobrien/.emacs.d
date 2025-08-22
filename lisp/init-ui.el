@@ -18,6 +18,12 @@
 ;; Font size
 (set-face-attribute 'default nil :height 150)
 
+;; Simplified interface
+(menu-bar-mode -1)
+(tool-bar-mode -1)
+
+(setq ring-bell-function 'ignore)
+  
 ;; Window management
 (use-package ace-window
   :ensure t

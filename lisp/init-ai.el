@@ -6,6 +6,8 @@
 ;;; Code:
 
 ;; GPTel (AI assistant)
+(define-prefix-command 'ai-map)
+(global-set-key (kbd "C-c l") 'ai-map)
 (use-package gptel
   :init
   (setq gptel-model 'claude-sonnet-4-20250514
