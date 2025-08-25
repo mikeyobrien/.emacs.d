@@ -27,16 +27,21 @@
    ("C-c l m" . gptel-menu))
   :config
   (require 'gptel-integrations)
-  
+
+  (setf (alist-get 'org-mode gptel-prompt-prefix-alist) "@user\n")
+  (setf (alist-get 'org-mode gptel-response-prefix-alist) "@assistant\n")
   ;; Define Open WebUI backend
   (defvar gptel-openwebui
     (gptel-make-openai "OpenWebUI"
       :host "chat.mobrienv.dev"
-      :protocol "https"
       :key openwebui-api-key
       :endpoint "/api/chat/completions"
       :stream t
-      :models '("gpt-5-chat-latest")))
+      :models '("gpt-5-chat-latest"
+                "google/gemini-2.5-flash"
+                "google/gemini-2.0-flash"
+                "gpt-oss:20b"
+                "deepseek/deepseek-chat-v3.1")))
   
   ;; Define AWS Bedrock backend
   (defvar gptel-bedrock
@@ -71,11 +76,7 @@
   ;; Set default backend to Open WebUI
   (setq gptel-backend gptel-openwebui
         gptel-model "gpt-5-chat-latest"
-        gptel-default-mode 'markdown-mode)
-  (add-hook 'buffer-list-update-hook
-            (lambda ()
-              (when (string= (buffer-name) "*AWS*")
-                (markdown-mode))))
+        gptel-default-mode 'org-mode)
   (add-hook 'gptel-mode-hook
             (lambda ()
               (setenv "AWS_PROFILE" "cline")))
@@ -107,7 +108,7 @@
 ;; Q CLI key bindings
 (global-set-key (kbd "C-c l q") 'open-q-cli-buffer)
 (global-set-key (kbd "C-c l t") 'toggle-q-cli-buffer)
-(global-set-key (kbd "C-c l r") 'refresh-q-cli-buffer)
+(global-set-key (kbd "C-c l r") 'gptel-q)
 
 (provide 'init-ai)
 ;;; init-ai.el ends here
