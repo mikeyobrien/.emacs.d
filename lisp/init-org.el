@@ -10,10 +10,10 @@
   :bind
   (("C-c a" . org-agenda)
    ("C-c c" . org-capture)
-   ("C-c l" . org-store-link))
+   ("C-c C-l" . org-store-link))
   :custom
   ;; Set org directory relative to default-directory
-  (org-directory (expand-file-name "org" default-directory))
+  (org-directory "~/org")
   
   ;; Basic org settings
   (org-startup-indented t)
@@ -68,8 +68,9 @@
            "* TODO %?\n  %i\n  %a")
           ("n" "Note" entry (file+headline org-default-notes-file "Notes")
            "* %? :NOTE:\n%U\n%a\n")
-          ("j" "Journal" entry (file+datetree (expand-file-name "journal.org" org-directory))
-           "* %?\n%U\n"))))
+          ("j" "Work Log" entry (file+datetree "~/org/journal.org")
+           "* %?"
+	   :empty-lines 0))))
 
 ;; Org-modern for better visuals (optional)
 (use-package org-modern

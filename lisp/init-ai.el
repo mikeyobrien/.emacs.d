@@ -37,18 +37,18 @@
       :key openwebui-api-key
       :endpoint "/api/chat/completions"
       :stream t
-      :models '("gpt-5-chat-latest"
-                "google/gemini-2.5-flash"
-                "google/gemini-2.0-flash"
-                "gpt-oss:20b"
-                "deepseek/deepseek-chat-v3.1")))
+      :models '(gpt-5-chat-latest
+                google/gemini-2.5-flash
+                google/gemini-2.0-flash
+                gpt-oss:20b
+                deepseek/deepseek-chat-v3.1)))
   
   ;; Define AWS Bedrock backend
   (defvar gptel-bedrock
     (gptel-make-bedrock "AWS"
       :stream t
       :region "us-west-2"
-      :models '("claude-sonnet-4-20250514")
+      :models '(claude-sonnet-4-20250514)
       :model-region 'us))
   
   ;; Backend switching functions
@@ -56,7 +56,7 @@
     "Switch to Open WebUI backend."
     (interactive)
     (setq gptel-backend gptel-openwebui
-          gptel-model "gpt-5-chat-latest")
+          gptel-model 'gpt-5-chat-latest)
     (message "Switched to Open WebUI backend"))
   
   (defun gptel-switch-to-bedrock ()
