@@ -18,10 +18,17 @@
 
 ;; Font configuration
 (defun setup-fonts ()
-  "Set up fonts, preferring Fira Code Nerd Font if available."
+  "Set up fonts, preferring IosevkaTerm Nerd Font if available."
   (let ((font-height 150))
     (cond
-     ;; Check for Fira Code Nerd Font
+     ;; Check for IosevkaTerm Nerd Font
+     ((find-font (font-spec :name "IosevkaTerm Nerd Font"))
+      (set-face-attribute 'default nil
+                          :font "IosevkaTerm Nerd Font"
+                          :height font-height)
+      (set-fontset-font t 'symbol "IosevkaTerm Nerd Font" nil 'prepend)
+      (message "Using IosevkaTerm Nerd Font"))
+     ;; Fallback to Fira Code Nerd Font
      ((find-font (font-spec :name "FiraCode Nerd Font"))
       (set-face-attribute 'default nil
                           :font "FiraCode Nerd Font"
@@ -36,14 +43,15 @@
       (message "Using Fira Code"))
      (t
       (set-face-attribute 'default nil :height font-height)
-      (message "Fira Code fonts not found, using default font")))))
+      (message "IosevkaTerm/Fira Code fonts not found, using default font")))))
 
 ;; Apply font settings
 (setup-fonts)
 
-;; Enable ligatures for Fira Code if available
+;; Enable ligatures if available
 (when (and (fboundp 'mac-auto-operator-composition-mode)
-           (member "FiraCode Nerd Font" (font-family-list)))
+           (or (member "IosevkaTerm Nerd Font" (font-family-list))
+               (member "FiraCode Nerd Font" (font-family-list))))
   (mac-auto-operator-composition-mode t))
 
 ;; Simplified interface

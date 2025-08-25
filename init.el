@@ -10,8 +10,6 @@
 (setq custom-file (locate-user-emacs-file "custom.el"))
 (load custom-file 'noerror)
 
-
-
 ;; Load configuration modules
 (require 'init-utils)
 (require 'init-org)
@@ -28,8 +26,10 @@
 
 
 ;; Load work configuration if on work machine
-(when (and (file-exists-p (expand-file-name "machine-config.el" user-emacs-directory)))
-           (require 'init-work) 
+(when (and (file-exists-p (expand-file-name "machine-config.el" user-emacs-directory))
+           (progn (require 'machine-config nil t)
+                  (bound-and-true-p is-work-machine)))
+  (require 'init-work)
   (message "Work configuration loaded"))
 
 ;;; init.el ends here

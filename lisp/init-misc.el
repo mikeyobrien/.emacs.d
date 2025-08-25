@@ -5,6 +5,17 @@
 
 ;;; Code:
 
+;; Auto-revert mode - automatically refresh buffers when files change externally
+(use-package autorevert
+  :ensure nil  ; built-in package
+  :config
+  (global-auto-revert-mode 1)
+  :custom
+  (auto-revert-interval 1)  ; Check for changes every second
+  (auto-revert-check-vc-info t)  ; Also check version control info
+  (auto-revert-verbose nil)  ; Don't show messages when reverting
+  (global-auto-revert-non-file-buffers t))  ; Also revert non-file buffers like Dired
+
 ;; Which-key (key binding help)
 (which-key-mode 1)
 

@@ -22,3 +22,6 @@ machine-config.el
 
 # Custom Emacs configuration
 custom.el
+
+# Secrets file (contains API keys)
+secrets.el

@@ -5,6 +5,9 @@
 
 ;;; Code:
 
+;; Load secrets (contains API keys)
+(load (expand-file-name "secrets.el" user-emacs-directory) t)
+
 ;; GPTel (AI assistant)
 (define-prefix-command 'ai-map)
 (global-set-key (kbd "C-c l") 'ai-map)
@@ -18,20 +21,57 @@
 
 
 (use-package gptel
-  :init
-  (setq gptel-model 'claude-sonnet-4-20250514
-        gptel-backend (gptel-make-bedrock "AWS"
-                        :stream t
-                        :region "us-west-2"
-                        :models '(claude-sonnet-4-20250514)
-                        :model-region 'us)
-        gptel-default-mode 'markdown-mode)
   :bind
   (("C-c l l" . gptel)
    ("C-c l r" . gptel-rewrite)
    ("C-c l m" . gptel-menu))
   :config
   (require 'gptel-integrations)
+  
+  ;; Define Open WebUI backend
+  (defvar gptel-openwebui
+    (gptel-make-openai "OpenWebUI"
+      :host "chat.mobrienv.dev"
+      :protocol "https"
+      :key openwebui-api-key
+      :endpoint "/api/chat/completions"
+      :stream t
+      :models '("gpt-5-chat-latest")))
+  
+  ;; Define AWS Bedrock backend
+  (defvar gptel-bedrock
+    (gptel-make-bedrock "AWS"
+      :stream t
+      :region "us-west-2"
+      :models '("claude-sonnet-4-20250514")
+      :model-region 'us))
+  
+  ;; Backend switching functions
+  (defun gptel-switch-to-openwebui ()
+    "Switch to Open WebUI backend."
+    (interactive)
+    (setq gptel-backend gptel-openwebui
+          gptel-model "gpt-5-chat-latest")
+    (message "Switched to Open WebUI backend"))
+  
+  (defun gptel-switch-to-bedrock ()
+    "Switch to AWS Bedrock backend."
+    (interactive)
+    (setq gptel-backend gptel-bedrock
+          gptel-model 'claude-sonnet-4-20250514)
+    (message "Switched to AWS Bedrock backend"))
+  
+  (defun gptel-switch-backend ()
+    "Toggle between Open WebUI and AWS Bedrock backends."
+    (interactive)
+    (if (eq gptel-backend gptel-openwebui)
+        (gptel-switch-to-bedrock)
+      (gptel-switch-to-openwebui)))
+  
+  ;; Set default backend to Open WebUI
+  (setq gptel-backend gptel-openwebui
+        gptel-model "gpt-5-chat-latest"
+        gptel-default-mode 'markdown-mode)
   (add-hook 'buffer-list-update-hook
             (lambda ()
               (when (string= (buffer-name) "*AWS*")
@@ -58,6 +98,11 @@
   :after gptel
   :bind (:map magit-status-mode-map
               ("C-c c" . gptel-commit-generate)))
+
+;; Backend switching key bindings
+(define-key ai-map (kbd "s") 'gptel-switch-backend)
+(define-key ai-map (kbd "o") 'gptel-switch-to-openwebui)
+(define-key ai-map (kbd "b") 'gptel-switch-to-bedrock)
 
 ;; Q CLI key bindings
 (global-set-key (kbd "C-c l q") 'open-q-cli-buffer)

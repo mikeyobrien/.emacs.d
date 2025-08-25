@@ -1,3 +1,4 @@
+
 ;;; init-android.el --- Android-specific configuration -*- lexical-binding: t -*-
 
 ;;; Commentary:
@@ -59,9 +60,9 @@
   (global-set-key (kbd "C-g") 'keyboard-quit)
   
   ;; Android hardware button bindings
-  ;; Volume up -> M-x, Volume down -> find-file
+  ;; Volume gup -> M-x, Volume down -> find-file
   (global-set-key [volume-up] 'execute-extended-command)
-  (global-set-key [volume-down] 'org-capture))
+  (global-set-key [volume-down] 'meow-escape-or-normal-modal))
 
 (provide 'init-android)
 ;;; init-android.el ends here
