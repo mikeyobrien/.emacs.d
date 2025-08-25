@@ -16,15 +16,20 @@ KEY-DEFINITIONS are pairs of (key . command)."
      (define-prefix-command ',prefix-name)
      (global-set-key (kbd ,key-binding) ',prefix-name)
      ,@(mapcar (lambda (key-def)
-                 `(define-key ,prefix-name (kbd ,(car key-def)) ,(cdr key-def)))
+                 `(define-key ,prefix-name (kbd ,(car key-def)) ',(cdr key-def)))
                key-definitions)))
 
 ;; emacs bindings
 (define-prefix-command-with-keys emacs "C-c q"
-  ("q" . 'save-buffers-kill-terminal)
-  ("Q" . 'restart-emacs)
-  ("r" . 'reload-emacs-config))
+  ("q" . save-buffers-kill-terminal)
+  ("Q" . restart-emacs)
+  ("r" . reload-emacs-config))
 
+(define-prefix-command-with-keys buffers "C-c b"
+				 ("b" . switch-to-buffer)
+				 ("n" . next-buffer)
+				 ("p" . previous-buffer)
+				 ("k" . kill-buffer))
 (global-set-key (kbd "M-o") 'ace-window)
  
 

@@ -8,6 +8,15 @@
 ;; GPTel (AI assistant)
 (define-prefix-command 'ai-map)
 (global-set-key (kbd "C-c l") 'ai-map)
+
+(use-package claude-code-ide
+  :vc (:url "https://github.com/manzaltu/claude-code-ide.el" :rev :newest)
+  :bind ("C-c C-'" . claude-code-ide-menu) 
+  :config
+  (setq claude-code-ide-terminal-backend 'eat)
+  (claude-code-ide-emacs-tools-setup)) 
+
+
 (use-package gptel
   :init
   (setq gptel-model 'claude-sonnet-4-20250514
