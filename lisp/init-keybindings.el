@@ -6,35 +6,26 @@
 ;;; Code:
 
 ;; Macro for creating prefix commands with nested keybindings
-(defmacro define-prefix-command-with-keys (prefix-name key-binding &optional description &rest key-definitions)
-  "Define a prefix command and bind keys to it.
-PREFIX-NAME is the symbol for the prefix keymap.
-KEY-BINDING is the global key sequence to bind the prefix to.
-DESCRIPTION is the optional which-key description.
-KEY-DEFINITIONS are pairs of (key . command)."
-  `(progn
-     (define-prefix-command ',prefix-name)
-     (global-set-key (kbd ,key-binding) ',prefix-name)
-     ,@(mapcar (lambda (key-def)
-                 `(define-key ,prefix-name (kbd ,(car key-def)) ',(cdr key-def)))
-               key-definitions)))
+(use-package general
+  :config
+  (general-create-definer my/leader-keys
+    :prefix "C-c")
 
-;; emacs bindings
-(define-prefix-command-with-keys emacs "C-c q"
-  ("q" . save-buffers-kill-terminal)
-  ("Q" . restart-emacs)
-  ("r" . reload-emacs-config))
+  (my/leader-keys
+    "q"  '(:ignore t :which-key "emacs")
+    "qq" '(save-buffers-kill-terminal :which-key "quit emacs")
+    "qQ" '(restart-emacs :which-key "restart emacs")
+    "qr" '(reload-emacs-config :which-key "reload config")
 
-(define-prefix-command-with-keys buffers "C-c b"
-				 ("b" . switch-to-buffer)
-				 ("n" . next-buffer)
-				 ("p" . previous-buffer)
-				 ("k" . kill-buffer))
-(define-prefix-command-with-keys emacs "C-c f"
-				 ("/" . 'isearch-forward))
+    "b"  '(:ignore t :which-key "buffers")
+    "bb" '(consult-buffer :which-key "switch buffer")
+    "bn" '(next-buffer :which-key "next buffer")
+    "bp" '(previous-buffer :which-key "previous buffer")
+    "bk" '(kill-buffer :which-key "kill buffer"))
 
-(global-set-key (kbd "M-o") 'ace-window)
-(global-set-key (kbd "C-c C-/") 'consult-ripgrep)
+  (general-define-key
+   "M-o" 'ace-window
+   "C-c C-/" 'consult-ripgrep))
 
 (defun meow-setup ()
   (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
@@ -129,7 +120,8 @@ KEY-DEFINITIONS are pairs of (key . command)."
   (meow-setup)
   (meow-global-mode 1))
 
-
+  
 
 (provide 'init-keybindings)
+
 ;;; init-keybindings.el ends here

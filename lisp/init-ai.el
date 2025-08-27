@@ -75,7 +75,7 @@
   
   ;; Set default backend to Open WebUI
   (setq gptel-backend gptel-openwebui
-        gptel-model "gpt-5-chat-latest"
+        gptel-model 'gpt-5-chat-latest
         gptel-default-mode 'org-mode)
   (add-hook 'gptel-mode-hook
             (lambda ()
