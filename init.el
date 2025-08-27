@@ -24,6 +24,13 @@
 (require 'init-android)
 (require 'init-ai)
 
+(customize-set-variable 'tramp-default-method "sshx")
+;; TRAMP performance optimizations for Projectile
+(setq tramp-ssh-controlmaster-options "-o ControlMaster=auto -o ControlPath='tramp.%%C' -o ControlPersist=10"
+      tramp-completion-reread-directory-timeout 10
+      tramp-copy-size-limit 10000
+      remote-file-name-inhibit-cache nil
+      tramp-verbose 1)
 
 ;; Load work configuration if on work machine
 (when (and (file-exists-p (expand-file-name "machine-config.el" user-emacs-directory))

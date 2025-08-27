@@ -8,7 +8,7 @@
 ;; Theme and modeline
 (use-package doom-themes
   :config
-  (load-theme 'doom-one t))
+  (load-theme 'doom-ayu-dark t))
 (use-package all-the-icons
   :ensure t)
 (use-package nerd-icons)
@@ -19,7 +19,7 @@
 ;; Font configuration
 (defun setup-fonts ()
   "Set up fonts, preferring IosevkaTerm Nerd Font if available."
-  (let ((font-height 150))
+  (let ((font-height (if (string-equal (system-name) "g14") 10 150)))
     (cond
      ;; Check for IosevkaTerm Nerd Font
      ((find-font (font-spec :name "IosevkaTerm Nerd Font"))
@@ -57,7 +57,8 @@
 ;; Simplified interface
 (menu-bar-mode -1)
 (tool-bar-mode -1)
-
+(when (display-graphic-p)
+  (scroll-bar-mode -1))
 
 (setq ring-bell-function 'ignore)
   

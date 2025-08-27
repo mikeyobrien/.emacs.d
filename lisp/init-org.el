@@ -72,11 +72,11 @@
            "* %?"
 	   :empty-lines 0))))
 
-;; Org-modern for better visuals (optional)
-(use-package org-modern
-  :after org
-  :config
-  (global-org-modern-mode))
+  ;; Prevent org-capture from opening in new frame
+  (setq pop-up-frames nil)
+  (add-to-list 'display-buffer-alist
+               '("\\*Capture\\*" display-buffer-same-window))
+
 
 ;; Org-roam for networked thought
 (use-package org-roam

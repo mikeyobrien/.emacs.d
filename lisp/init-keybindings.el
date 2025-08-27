@@ -30,6 +30,9 @@ KEY-DEFINITIONS are pairs of (key . command)."
 				 ("n" . next-buffer)
 				 ("p" . previous-buffer)
 				 ("k" . kill-buffer))
+(define-prefix-command-with-keys emacs "C-c f"
+				 ("/" . 'isearch-forward))
+
 (global-set-key (kbd "M-o") 'ace-window)
  
 

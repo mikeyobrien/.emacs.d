@@ -48,6 +48,9 @@
    ("M-.". embark-dwim)
    ("C-,". embark-act-all)))
 
+(use-package embark-consult
+  :ensure t)
+
 ;; Example configuration for Consult
 (use-package consult
   ;; Replace bindings. Lazily loaded by `use-package'.
