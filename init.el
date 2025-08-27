@@ -39,4 +39,5 @@
   (require 'init-work)
   (message "Work configuration loaded"))
 
+
 ;;; init.el ends here

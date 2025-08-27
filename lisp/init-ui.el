@@ -14,7 +14,11 @@
 (use-package nerd-icons)
 (use-package doom-modeline
   :init
-  (doom-modeline-mode 1))
+  (doom-modeline-mode 1)
+  :custom
+  (setq doom-font (font-spec :family "JetBrainsMono Nerd Font" :size 12 :weight 'regular))
+  (setq nerd-icons-font-family "JetBrainsMono Nerd Font")
+  (setq doom-symbol-font (font-spec :family "JetBrainsMono Nerd Font" :size 11)))
 
 ;; Font configuration
 (defun setup-fonts ()

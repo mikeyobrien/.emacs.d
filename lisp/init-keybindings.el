@@ -34,7 +34,7 @@ KEY-DEFINITIONS are pairs of (key . command)."
 				 ("/" . 'isearch-forward))
 
 (global-set-key (kbd "M-o") 'ace-window)
- 
+(global-set-key (kbd "C-c C-/") 'consult-ripgrep)
 
 (defun meow-setup ()
   (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
@@ -121,6 +121,7 @@ KEY-DEFINITIONS are pairs of (key . command)."
    '("z" . meow-pop-selection)
    '("'" . repeat)
    '("<escape>" . ignore)))
+
 
 (use-package meow
   :ensure t

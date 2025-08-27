@@ -43,6 +43,7 @@
 
 ;; Embark (contextual actions)
 (use-package embark
+  :ensure t
   :bind
   (("C-.". embark-act)
    ("M-.". embark-dwim)

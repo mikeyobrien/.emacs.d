@@ -30,7 +30,25 @@
 ;; Terminal emulator
 (use-package eat
   :bind
-  ("C-c t" . eat))
+  ("C-c t" . eat)
+  :custom
+  ;; Add settings so eat behaves better with meow mode
+  (with-eval-after-load 'eat
+    (with-eval-after-load 'meow
+      (defun my/eat-meow-integration ()
+        (setq eat-enable-mouse nil)
+        (setq eat-kill-buffer-on-exit t)
+        (add-hook 'eat-exit-hook #'meow--apply-input-method))
+      
+      (add-hook 'eat-mode-hook #'my/eat-meow-integration)
+      
+      (define-key eat-mode-map (kbd "C-c C-c") #'meow-normal-mode)
+      (define-key eat-mode-map (kbd "C-c C-i") #'meow-insert-mode)
+      (define-key eat-mode-map (kbd "C-c C-v") #'meow-visual-mode)
+      (define-key eat-mode-map (kbd "C-c C-e") #'meow-insert-exit))))
+
+
 
 (provide 'init-misc)
+
 ;;; init-misc.el ends here
