@@ -4,6 +4,7 @@
   (interactive)
   (message "hello, world!"))
 
+
 (defun reload-emacs-config ()
   "Reload the Emacs configuration by clearing features and reloading init.el."
   (interactive)

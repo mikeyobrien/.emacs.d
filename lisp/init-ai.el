@@ -24,6 +24,7 @@
   :bind
   (("C-c l l" . gptel)
    ("C-c l r" . gptel-rewrite)
+   ("C-c l a" . gptel-lookup)
    ("C-c l m" . gptel-menu))
   :config
   (require 'gptel-integrations)
@@ -72,6 +73,44 @@
     (if (eq gptel-backend gptel-openwebui)
         (gptel-switch-to-bedrock)
       (gptel-switch-to-openwebui)))
+
+  (defvar gptel-lookup--history nil)
+
+(defun gptel-lookup (prompt)
+  (interactive (list (read-string "Ask AI: " nil gptel-lookup--history)))
+  (when (string= prompt "") (user-error "A prompt is required."))
+  (gptel-request
+   prompt
+   :callback
+   (lambda (response info)
+     (if (not response)
+         (message "gptel-lookup failed with message: %s" (plist-get info :status))
+       (with-current-buffer (get-buffer-create "*gptel-lookup*")
+         (let ((inhibit-read-only t))
+           (erase-buffer)
+           (insert response))
+	 (special-mode)
+         (org-mode)
+         (display-buffer (current-buffer)
+                         `((display-buffer-in-side-window)
+                           (side . bottom)
+                           (window-height . ,#'fit-window-to-buffer))))))))
+
+  (defun mov/gptel-mode-auto ()
+  "Ensure that this file opens with `gptel-mode' enabled."
+  (save-excursion
+    (let ((enable-local-variables t))  ; Ensure we can modify local variables
+      (if (and (save-excursion
+                 (goto-char (point-min))
+                 (looking-at ".*-\\*-")))  ; If there's a -*- line
+        ;; First remove any existing eval, then add the new one
+        (modify-file-local-variable-prop-line
+          'eval nil 'delete))
+      ;; Always add our eval
+      (add-file-local-variable-prop-line
+        'eval '(and (fboundp 'gptel-mode) (gptel-mode 1))))))
+
+  (add-hook 'gptel-save-state-hook #'mov/gptel-mode-auto)
   
   ;; Set default backend to Open WebUI
   (setq gptel-backend gptel-openwebui
@@ -79,9 +118,7 @@
         gptel-default-mode 'org-mode)
   (add-hook 'gptel-mode-hook
             (lambda ()
-              (setenv "AWS_PROFILE" "cline")))
-  (add-hook 'gptel-post-stream-hook 'gptel-auto-scroll)
-  (add-hook 'gptel-post-response-functions 'gptel-end-of-response))
+              (setenv "AWS_PROFILE" "cline"))))
 
 ;; MCP (Model Context Protocol)
 (use-package mcp

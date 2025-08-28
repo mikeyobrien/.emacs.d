@@ -10,8 +10,12 @@
 (setq custom-file (locate-user-emacs-file "custom.el"))
 (load custom-file 'noerror)
 
+(recentf-mode 1)
+(winner-mode 1)
+ 
 ;; Load configuration modules
 (require 'init-utils)
+(require 'init-keybindings)
 (require 'init-org)
 (require 'init-package)
 (require 'init-system)
@@ -20,7 +24,7 @@
 (require 'init-project)
 (require 'init-programming)
 (require 'init-misc)
-(require 'init-keybindings)
+
 (require 'init-android)
 (require 'init-ai)
 
@@ -40,4 +44,10 @@
   (message "Work configuration loaded"))
 
 
+;;; init.el ends here
+
+;; Local Variables:
+;; coding: utf-8
+;; no-byte-compile: t
+;; End:
 ;;; init.el ends here

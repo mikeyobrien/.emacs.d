@@ -7,16 +7,26 @@
 
 ;; Macro for creating prefix commands with nested keybindings
 (use-package general
+  :init
+  (unbind-key "C-c b")
   :config
-  (general-create-definer my/leader-keys
+  (general-create-definer mov/leader-keys
     :prefix "C-c")
 
-  (my/leader-keys
+  (mov/leader-keys
     "q"  '(:ignore t :which-key "emacs")
     "qq" '(save-buffers-kill-terminal :which-key "quit emacs")
     "qQ" '(restart-emacs :which-key "restart emacs")
     "qr" '(reload-emacs-config :which-key "reload config")
 
+    "w"  '(:ignore t :which-key "window")
+    "wp" '(winner-undo :which-key "undo")
+    "wn" '(winner-redo :which-key "redo")
+
+    "f"  '(:ignore t :which-key "files")
+    "ff" '(find-file :which-key "find file")
+    "fe" '(consult-recent-file :which-key "recent files")
+    
     "b"  '(:ignore t :which-key "buffers")
     "bb" '(consult-buffer :which-key "switch buffer")
     "bn" '(next-buffer :which-key "next buffer")
@@ -90,12 +100,12 @@
    '("l" . meow-right)
    '("L" . meow-right-expand)
    '("m" . meow-join)
-   '("n" . meow-search)
+   '("n" . consult-find)
    '("o" . meow-block)
    '("O" . meow-to-block)
    '("p" . meow-yank)
    '("q" . meow-quit)
-   '("Q" . meow-goto-line)
+   '("Q" . consult-line)
    '("r" . meow-replace)
    '("R" . meow-swap-grab)
    '("s" . meow-kill)

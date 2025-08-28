@@ -5,6 +5,18 @@
 
 ;;; Code:
 
+(defun mov/open-org-notes ()
+  "Open the notes.org file."
+  (interactive)
+  (find-file "~/org/notes.org"))
+
+(defun mov/search-org ()
+  "Set working directory to ~/org then run consult-ripgrep"
+  (interactive)
+  (let ((default-directory (expand-file-name "~/org")))
+    (consult-ripgrep)))
+
+
 (use-package org
   :ensure nil
   :bind
@@ -56,7 +68,11 @@
   (org-hide-leading-stars t)
   (org-fontify-quote-and-verse-blocks t)
   (org-fontify-whole-heading-line t)
-  
+
+    
+  :bind (("C-c n c" . org-capture)
+	 ("C-c n s" . mov/search-org)
+	 ("C-c n n" . mov/open-org-notes))
   :config
   ;; Create org directory if it doesn't exist
   (unless (file-exists-p org-directory)
