@@ -15,11 +15,12 @@
  
 ;; Load configuration modules
 (require 'init-utils)
-(require 'init-keybindings)
+
 (require 'init-org)
 (require 'init-package)
 (require 'init-system)
 (require 'init-ui)
+(require 'init-keybindings)
 (require 'init-completion)
 (require 'init-project)
 (require 'init-programming)
