@@ -134,18 +134,15 @@
 ;; GPTel commit messages
 (use-package gptel-commit
   :after gptel
-  :bind (:map magit-status-mode-map
-              ("C-c c" . gptel-commit-generate)))
+  :bind ((:map magit-status-mode-map
+               ("C-c c" . gptel-commit-generate))
+         (:map git-commit-mode-map
+               ("C-c C-a" . gptel-commit))))
 
 ;; Backend switching key bindings
 (define-key ai-map (kbd "s") 'gptel-switch-backend)
 (define-key ai-map (kbd "o") 'gptel-switch-to-openwebui)
 (define-key ai-map (kbd "b") 'gptel-switch-to-bedrock)
-
-;; Q CLI key bindings
-(global-set-key (kbd "C-c l q") 'open-q-cli-buffer)
-(global-set-key (kbd "C-c l t") 'toggle-q-cli-buffer)
-(global-set-key (kbd "C-c l r") 'gptel-q)
 
 (provide 'init-ai)
 ;;; init-ai.el ends here

@@ -21,6 +21,12 @@
 (require 'init-system)
 (require 'init-ui)
 (require 'init-keybindings)
+
+;; Modal editing (set to nil to disable)
+(defvar enable-meow t)
+(when enable-meow
+  (require 'init-meow))
+
 (require 'init-completion)
 (require 'init-project)
 (require 'init-programming)
@@ -38,12 +44,13 @@
       tramp-verbose 1)
 
 ;; Load work configuration if on work machine
-(when (and (file-exists-p (expand-file-name "machine-config.el" user-emacs-directory))
-           (progn (require 'machine-config nil t)
-                  (bound-and-true-p is-work-machine)))
-  (require 'init-work)
-  (message "Work configuration loaded"))
-
+(let ((machine-config-file (expand-file-name "machine-config.el" user-emacs-directory)))
+  (when (file-exists-p machine-config-file)
+    (load machine-config-file)
+    (when (bound-and-true-p is-work-machine)
+      (require 'init-work)
+      (setq gptel-backend gptel-bedrock)
+      (message "Work configuration loaded"))))
 
 ;;; init.el ends here
 

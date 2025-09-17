@@ -74,6 +74,9 @@
 	 ("C-c n s" . mov/search-org)
 	 ("C-c n n" . mov/open-org-notes))
   :config
+  ;; Enable tempo for <s TAB expansion
+  (require 'org-tempo)
+  
   ;; Create org directory if it doesn't exist
   (unless (file-exists-p org-directory)
     (make-directory org-directory t))
@@ -92,6 +95,9 @@
   (setq pop-up-frames nil)
   (add-to-list 'display-buffer-alist
                '("\\*Capture\\*" display-buffer-same-window))
+
+  ;; Enable word wrap in capture buffers
+  (add-hook 'org-capture-mode-hook 'visual-line-mode)
 
 
 ;; Org-roam for networked thought

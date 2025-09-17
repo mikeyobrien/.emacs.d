@@ -5,6 +5,7 @@
 
 ;;; Code:
 
+
 ;; Macro for creating prefix commands with nested keybindings
 (use-package general
   :init
@@ -22,6 +23,7 @@
     "w"  '(:ignore t :which-key "window")
     "wp" '(winner-undo :which-key "undo")
     "wn" '(winner-redo :which-key "redo")
+    "wo" '(ace-window :which-key "ace window")
 
     "f"  '(:ignore t :which-key "files")
     "ff" '(find-file :which-key "find file")
@@ -37,100 +39,90 @@
    "M-o" 'ace-window
    "C-c C-/" 'consult-ripgrep))
 
-(defun meow-setup ()
-  (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
-  (meow-motion-define-key
-   '("j" . meow-next)
-   '("k" . meow-prev)
-   '("<escape>" . ignore))
-  (meow-leader-define-key
-   ;; SPC j/k will run the original command in MOTION state.
-   '("j" . "H-j")
-   '("k" . "H-k")
-   ;; Use SPC (0-9) for digit arguments.
-   '("1" . meow-digit-argument)
-   '("2" . meow-digit-argument)
-   '("3" . meow-digit-argument)
-   '("4" . meow-digit-argument)
-   '("5" . meow-digit-argument)
-   '("6" . meow-digit-argument)
-   '("7" . meow-digit-argument)
-   '("8" . meow-digit-argument)
-   '("9" . meow-digit-argument)
-   '("0" . meow-digit-argument)
-   '("/" . meow-keypad-describe-key)
-   '("?" . meow-cheatsheet))
-  (meow-normal-define-key
-   '("0" . meow-expand-0)
-   '("9" . meow-expand-9)
-   '("8" . meow-expand-8)
-   '("7" . meow-expand-7)
-   '("6" . meow-expand-6)
-   '("5" . meow-expand-5)
-   '("4" . meow-expand-4)
-   '("3" . meow-expand-3)
-   '("2" . meow-expand-2)
-   '("1" . meow-expand-1)
-   '("-" . negative-argument)
-   '(";" . meow-reverse)
-   '("," . meow-inner-of-thing)
-   '("." . meow-bounds-of-thing)
-   '("[" . meow-beginning-of-thing)
-   '("]" . meow-end-of-thing)
-   '("a" . meow-append)
-   '("A" . meow-open-below)
-   '("b" . meow-back-word)
-   '("B" . meow-back-symbol)
-   '("c" . meow-change)
-   '("d" . meow-delete)
-   '("D" . meow-backward-delete)
-   '("e" . meow-next-word)
-   '("E" . meow-next-symbol)
-   '("f" . meow-find)
-   '("g" . meow-cancel-selection)
-   '("G" . meow-grab)
-   '("h" . meow-left)
-   '("H" . meow-left-expand)
-   '("i" . meow-insert)
-   '("I" . meow-open-above)
-   '("j" . meow-next)
-   '("J" . meow-next-expand)
-   '("k" . meow-prev)
-   '("K" . meow-prev-expand)
-   '("l" . meow-right)
-   '("L" . meow-right-expand)
-   '("m" . meow-join)
-   '("n" . consult-find)
-   '("o" . meow-block)
-   '("O" . meow-to-block)
-   '("p" . meow-yank)
-   '("q" . meow-quit)
-   '("Q" . consult-line)
-   '("r" . meow-replace)
-   '("R" . meow-swap-grab)
-   '("s" . meow-kill)
-   '("t" . meow-till)
-   '("u" . meow-undo)
-   '("U" . meow-undo-in-selection)
-   '("v" . meow-visit)
-   '("w" . meow-mark-word)
-   '("W" . meow-mark-symbol)
-   '("x" . meow-line)
-   '("X" . meow-goto-line)
-   '("y" . meow-save)
-   '("Y" . meow-sync-grab)
-   '("z" . meow-pop-selection)
-   '("'" . repeat)
-   '("<escape>" . ignore)))
 
 
-(use-package meow
-  :ensure t
-  :config
-  (meow-setup)
-  (meow-global-mode 1))
+;; Scroll hydra
+(use-package hydra
+  :ensure t)
 
-  
+(defhydra hydra-scroll (:color red :hint nil)
+  "
+^Scroll^
+^------^
+_d_: scroll down (C-d)
+_u_: scroll up (C-u)
+_q_: quit
+"
+  ("d" scroll-up-command)
+  ("u" scroll-down-command)
+  ("q" nil))
+
+;; Window management hydra
+(defhydra hydra-window (:color red :hint nil)
+  "
+^Move^          ^Split^         ^Resize^
+^----^          ^-----^         ^------^
+_h_: left       _v_: vertical   _H_: shrink horizontal
+_j_: down       _s_: horizontal _J_: shrink vertical
+_k_: up         _d_: delete     _K_: enlarge vertical
+_l_: right      _o_: delete others _L_: enlarge horizontal
+_q_: quit
+"
+  ("h" windmove-left)
+  ("j" windmove-down)
+  ("k" windmove-up)
+  ("l" windmove-right)
+  ("v" split-window-right)
+  ("s" split-window-below)
+  ("d" delete-window)
+  ("o" delete-other-windows)
+  ("H" shrink-window-horizontally)
+  ("J" shrink-window)
+  ("K" enlarge-window)
+  ("L" enlarge-window-horizontally)
+  ("q" nil))
+
+;; Text scale hydra
+(defhydra hydra-zoom (:color red :hint nil)
+  "
+^Zoom^
+^----^
+_+_: increase
+_-_: decrease
+_0_: reset
+_q_: quit
+"
+  ("+" text-scale-increase)
+  ("-" text-scale-decrease)
+  ("0" (text-scale-adjust 0))
+  ("q" nil))
+
+;; Rectangle operations hydra
+(defhydra hydra-rectangle (:color pink :hint nil)
+  "
+^Move^          ^Edit^
+^----^          ^----^
+_h_: left       _t_: type
+_j_: down       _d_: kill
+_k_: up         _y_: yank
+_l_: right      _c_: clear
+_q_: quit
+"
+  ("h" rectangle-backward-char)
+  ("l" rectangle-forward-char)
+  ("k" rectangle-previous-line)
+  ("j" rectangle-next-line)
+  ("t" string-rectangle)
+  ("d" kill-rectangle)
+  ("y" yank-rectangle)
+  ("c" clear-rectangle)
+  ("q" nil))
+
+;; Keybindings
+(global-set-key (kbd "C-c j") 'hydra-scroll/body)
+(global-set-key (kbd "C-c C-w") 'hydra-window/body)
+(global-set-key (kbd "C-c z") 'hydra-zoom/body)
+(global-set-key (kbd "C-c r") 'hydra-rectangle/body)
 
 (provide 'init-keybindings)
 
