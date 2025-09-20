@@ -19,6 +19,8 @@
 
 (use-package org
   :ensure nil
+  :hook
+  ('org-mode-hook #'visual-line-mode)
   :bind
   (("C-c a" . org-agenda)
    ("C-c c" . org-capture)
