@@ -16,14 +16,14 @@
   :init
   (doom-modeline-mode 1)
   :custom
-  (setq doom-font (font-spec :family "JetBrainsMono Nerd Font" :size 12 :weight 'regular))
+  (setq doom-font (font-spec :family "JetBrainsMono Nerd Font" :size 18 :weight 'regular))
   (setq nerd-icons-font-family "JetBrainsMono Nerd Font")
   (setq doom-symbol-font (font-spec :family "JetBrainsMono Nerd Font" :size 11)))
 
 ;; Font configuration
 (defun setup-fonts ()
   "Set up fonts, preferring IosevkaTerm Nerd Font if available."
-  (let ((font-height (if (string-equal (system-name) "g14") 10 150)))
+  (let ((font-height (if (string-equal (system-name) "g14") 190 150)))
     (cond
      ;; Check for IosevkaTerm Nerd Font
      ((find-font (font-spec :name "IosevkaTerm Nerd Font"))
