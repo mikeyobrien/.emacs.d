@@ -7,6 +7,7 @@
 
 ;; Vertico (vertical completion)
 (use-package vertico
+  :demand t
   :init
   (vertico-mode)
   :custom
@@ -14,12 +15,14 @@
 
 ;; Marginalia (completion annotations)
 (use-package marginalia
+  :demand t
   :after vertico
   :init
   (marginalia-mode))
 
 ;; Corfu (in-buffer completion)
 (use-package corfu
+  :demand t
   :custom
   (corfu-auto t)
   (corfu-auto-delay 250)
@@ -69,7 +72,7 @@
          ("C-x 5 b" . consult-buffer-other-frame)  ;; orig. switch-to-buffer-other-frame
          ("C-x t b" . consult-buffer-other-tab)    ;; orig. switch-to-buffer-other-tab
          ("C-x r b" . consult-bookmark)            ;; orig. bookmark-jump
-         ("C-c p b" . consult-project-buffer)      ;; orig. project-switch-to-buffer
+         ("C-x p b" . consult-project-buffer)      ;; orig. project-switch-to-buffer
          ;; Custom M-# bindings for fast register access
          ("M-#" . consult-register-load)
          ("M-'" . consult-register-store)          ;; orig. abbrev-prefix-mark (unrelated)
@@ -87,8 +90,8 @@
          ("M-g i" . consult-imenu)
          ("M-g I" . consult-imenu-multi)
          ;; M-s bindings in `search-map'
-         ("C-c f d" . consult-find)                  ;; Alternative: consult-fd
-         ("C-c f l" . consult-locate)
+         ("C-c d" . consult-find)                  ;; Alternative: consult-fd
+         ("C-c M-l" . consult-locate)
          ("C-c g s" . consult-git-grep)
          ("C-c C-r" . consult-ripgrep)
          ("C-c C-l" . consult-line)

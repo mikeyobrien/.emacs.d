@@ -20,7 +20,7 @@
 (use-package org
   :ensure nil
   :hook
-  ('org-mode-hook #'visual-line-mode)
+  (org-mode . visual-line-mode)
   :bind
   (("C-c a" . org-agenda)
    ("C-c c" . org-capture)
@@ -54,6 +54,8 @@
                        (org-agenda-files :maxlevel . 3)))
   (org-refile-use-outline-path 'file)
   (org-outline-path-complete-in-steps nil)
+  (org-refile-use-cache t)
+  (org-refile-allow-creating-parent-nodes 'confirm)
   
   ;; Source code blocks
   (org-src-fontify-natively t)
@@ -70,14 +72,21 @@
   (org-hide-leading-stars t)
   (org-fontify-quote-and-verse-blocks t)
   (org-fontify-whole-heading-line t)
+  
+  ;; Links & IDs
+  (org-id-link-to-org-use-id 'create-if-interactive)
 
     
-  :bind (("C-c n c" . org-capture)
-	 ("C-c n s" . mov/search-org)
+  :bind (("C-c n s" . mov/search-org)
 	 ("C-c n n" . mov/open-org-notes))
   :config
   ;; Enable tempo for <s TAB expansion
   (require 'org-tempo)
+  ;; Protocols & IDs
+  (require 'org-protocol)
+  (require 'org-id)
+  ;; Habits in agenda
+  (require 'org-habit)
   
   ;; Create org directory if it doesn't exist
   (unless (file-exists-p org-directory)
@@ -87,11 +96,14 @@
   (setq org-capture-templates
         '(("t" "Todo" entry (file+headline org-default-notes-file "Tasks")
            "* TODO %?\n  %i\n  %a")
+          ("i" "Inbox" entry (file "~/org/inbox.org")
+           "* TODO %?\n:CREATED: %U\n%a\n")
+          ("l" "Link" entry (file+headline "~/org/notes.org" "Bookmarks")
+           "* %? [[%:link][%:description]]\n:CREATED: %U\n" :immediate-finish t :empty-lines 1)
           ("n" "Note" entry (file+headline org-default-notes-file "Notes")
            "* %? :NOTE:\n%U\n%a\n")
           ("j" "Work Log" entry (file+datetree "~/org/journal.org")
-           "* %?"
-	   :empty-lines 0))))
+           "* %?" :empty-lines 0)))
 
   ;; Prevent org-capture from opening in new frame
   (setq pop-up-frames nil)
@@ -101,14 +113,26 @@
   ;; Enable word wrap in capture buffers
   (add-hook 'org-capture-mode-hook 'visual-line-mode)
 
+  ;; Custom agenda: quick overview
+  (setq org-agenda-custom-commands
+        '(("o" "Overview"
+           ((agenda "" ((org-agenda-span 'day)))
+            (todo "NEXT")
+            (todo "WAIT")))))
+
+  ;; Enable common babel languages
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((emacs-lisp . t)
+     (shell       . t)
+     (python      . t))))
+
 
 ;; Org-roam for networked thought
 (use-package org-roam
   :ensure t
   :custom
   (org-roam-directory (file-truename (expand-file-name "roam" org-directory)))
-  (unless (file-exists-p org-roam-directory)
-    (make-directory org-roam-directory t))
 
   :bind (("C-c n l" . org-roam-buffer-toggle)
          ("C-c n f" . org-roam-node-find)
@@ -118,6 +142,8 @@
          ;; Dailies
          ("C-c n j" . org-roam-dailies-capture-today))
   :config
+  (unless (file-exists-p org-roam-directory)
+    (make-directory org-roam-directory t))
   ;; If you're using a vertical completion framework, you might want a more informative completion interface
   (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
   

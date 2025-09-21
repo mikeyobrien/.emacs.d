@@ -38,10 +38,9 @@
   ;; Git command optimizations for remote projects
   (setq projectile-git-command "git ls-files -zco --exclude-standard"))
 
-(use-package counsel-projectile
- :after projectile
- :config
- (counsel-projectile-mode 1))
+;; Consult integration for Projectile (keeps Vertico/Consult stack consistent)
+(use-package consult-projectile
+  :after (projectile consult))
 
 ;; Magit
 (use-package magit

@@ -17,7 +17,10 @@
   (global-auto-revert-non-file-buffers t))  ; Also revert non-file buffers like Dired
 
 ;; Which-key (key binding help)
-(which-key-mode 1)
+(use-package which-key
+  :demand t
+  :init (which-key-mode 1)
+  :custom (which-key-idle-delay 0.4))
 
 ;; Disable mouse
 (use-package disable-mouse)
@@ -34,10 +37,14 @@
   ;; Truncate buffer for performance
   (add-to-list 'eshell-output-filter-functions 'eshell-truncate-buffer)
 
-  ;; Bind some useful keys for evil-mode
-  (evil-define-key '(normal insert visual) eshell-mode-map (kbd "C-r") 'counsel-esh-history)
-  (evil-define-key '(normal insert visual) eshell-mode-map (kbd "<home>") 'eshell-bol)
-  (evil-normalize-keymaps)
+  ;; History binding: use Consult everywhere
+  (define-key eshell-mode-map (kbd "C-r") #'consult-history)
+
+  ;; Only define Evil-specific bindings if Evil is present
+  (when (featurep 'evil)
+    (evil-define-key '(normal insert visual) eshell-mode-map (kbd "<home>") 'eshell-bol)
+    (when (fboundp 'evil-normalize-keymaps)
+      (evil-normalize-keymaps)))
 
   (setq eshell-history-size         10000
         eshell-buffer-maximum-lines 10000
@@ -55,21 +62,56 @@
 (use-package eat
   :bind
   ("C-c t" . eat)
-  :custom
-  ;; Add settings so eat behaves better with meow mode
-  (with-eval-after-load 'eat
-    (with-eval-after-load 'meow
-      (defun my/eat-meow-integration ()
-        (setq eat-enable-mouse nil)
-        (setq eat-kill-buffer-on-exit t)
-        (add-hook 'eat-exit-hook #'meow--apply-input-method))
-      
-      (add-hook 'eat-mode-hook #'my/eat-meow-integration)
-      
-      (define-key eat-mode-map (kbd "C-c C-c") #'meow-normal-mode)
-      (define-key eat-mode-map (kbd "C-c C-i") #'meow-insert-mode)
-      (define-key eat-mode-map (kbd "C-c C-v") #'meow-visual-mode)
-      (define-key eat-mode-map (kbd "C-c C-e") #'meow-insert-exit))))
+  :hook
+  ((eat-mode . my/eat-disable-line-numbers)
+   (eat-mode . my/eat-setup-meow))
+  :config
+  (setq eat-enable-mouse nil
+        eat-kill-buffer-on-exit t)
+
+  (define-key eat-mode-map (kbd "C-c C-c") #'meow-normal-mode)
+  (define-key eat-mode-map (kbd "C-c C-i") #'meow-insert-mode)
+  (define-key eat-mode-map (kbd "C-c C-v") #'meow-visual-mode)
+  (define-key eat-mode-map (kbd "C-c C-e") #'meow-insert-exit)
+  ;; Smart rename via GPTel
+  (define-key eat-mode-map (kbd "C-c C-n") #'mov/gptel-smart-rename-terminal)
+
+  (with-eval-after-load 'meow
+    (defun my/eat--meow-enter-insert ()
+      (when (derived-mode-p 'eat-mode)
+        (eat-char-mode)))
+
+    (defun my/eat--meow-exit-insert ()
+      (when (derived-mode-p 'eat-mode)
+        (eat-emacs-mode)))
+
+    (defun my/eat--teardown-meow-hooks ()
+      (remove-hook 'meow-insert-enter-hook #'my/eat--meow-enter-insert t)
+      (remove-hook 'meow-insert-exit-hook #'my/eat--meow-exit-insert t)
+      (remove-hook 'kill-buffer-hook #'my/eat--teardown-meow-hooks t))
+
+    (defun my/eat--setup-meow-hooks ()
+      (add-hook 'meow-insert-enter-hook #'my/eat--meow-enter-insert nil t)
+      (add-hook 'meow-insert-exit-hook #'my/eat--meow-exit-insert nil t)
+      (add-hook 'kill-buffer-hook #'my/eat--teardown-meow-hooks nil t)
+      (if (bound-and-true-p meow-insert-mode)
+          (my/eat--meow-enter-insert)
+        (my/eat--meow-exit-insert)))))
+
+(defun my/eat-disable-line-numbers ()
+  (interactive)
+  "Turn off line numbers inside EAT buffers."
+  (setq-local display-line-numbers nil)
+  (display-line-numbers-mode -1))
+
+(defun my/eat-setup-meow ()
+  (when (fboundp 'my/eat--setup-meow-hooks)
+    (my/eat--setup-meow-hooks)))
+
+;; Bind the same renamer in vterm if available
+(with-eval-after-load 'vterm
+  (when (boundp 'vterm-mode-map)
+    (define-key vterm-mode-map (kbd "C-c C-n") #'mov/gptel-smart-rename-terminal)))
 
 
 

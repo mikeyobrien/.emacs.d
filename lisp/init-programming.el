@@ -25,21 +25,54 @@
 
 ;; TypeScript
 (add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode))
-(add-hook 'typescript-mode-hook 'eglot-ensure)
+(add-hook 'typescript-ts-mode-hook 'eglot-ensure)
 
 
-;; JavaScript
+;; JavaScript: prefer tree-sitter when available
+(when (fboundp 'js-ts-mode)
+  (add-to-list 'auto-mode-alist '("\\.\\(js\\|mjs\\|cjs\\|es6\\)\\(\\.erb\\)?\\'" . js-ts-mode)))
+;; Fallback (kept for older Emacs)
 (add-to-list 'auto-mode-alist '("\\.\\(js\\|es6\\)\\(\\.erb\\)?\\'" . js-mode))
 
 ;; Nix
 (use-package nix-mode
   :ensure t)
 
-;; Markdown
+;; Markdown (modern setup)
 (use-package markdown-mode
   :ensure t
-  :config
-  (add-hook 'markdown-mode-hook #'gptel-mode))
+  :mode (("README\\.md\\'" . gfm-mode)
+         ("\\.md\\'" . markdown-mode)
+         ("\\.markdown\\'" . markdown-mode))
+  :init
+  (setq markdown-fontify-code-blocks-natively t
+        markdown-hide-markup t
+        markdown-enable-wiki-links t)
+  :hook
+  ((markdown-mode . gptel-mode)
+   (gfm-mode . gptel-mode)
+   (markdown-mode . visual-line-mode)
+   (markdown-mode . variable-pitch-mode)
+   (markdown-mode . (lambda () (display-line-numbers-mode -1))))
+  :bind (:map markdown-mode-map
+              ("C-c C-i" . markdown-insert-image)))
+
+(use-package markdown-toc
+  :after markdown-mode
+  :bind (:map markdown-mode-map
+              ("C-c m t" . markdown-toc-generate-toc)))
+
+;; Optional: GitHub-flavored live preview if grip is installed
+(use-package grip-mode
+  :after markdown-mode
+  :if (executable-find "grip")
+  :bind (:map markdown-mode-map
+              ("C-c m p" . grip-mode)))
+
+;; Eglot LSP for Markdown via marksman (if installed)
+(with-eval-after-load 'eglot
+  (when (executable-find "marksman")
+    (add-to-list 'eglot-server-programs '((gfm-mode markdown-mode) . ("marksman")))) )
 
 ;; Emacs Lisp
 

@@ -5,39 +5,8 @@
 
 ;;; Code:
 
-
-;; Macro for creating prefix commands with nested keybindings
-(use-package general
-  :init
-  (unbind-key "C-c b")
-  :config
-  (general-create-definer mov/leader-keys
-    :prefix "C-c")
-
-  (mov/leader-keys
-    "q"  '(:ignore t :which-key "emacs")
-    "qq" '(save-buffers-kill-terminal :which-key "quit emacs")
-    "qQ" '(restart-emacs :which-key "restart emacs")
-    "qr" '(reload-emacs-config :which-key "reload config")
-
-    "w"  '(:ignore t :which-key "window")
-    "wp" '(winner-undo :which-key "undo")
-    "wn" '(winner-redo :which-key "redo")
-    "wo" '(ace-window :which-key "ace window")
-
-    "f"  '(:ignore t :which-key "files")
-    "ff" '(find-file :which-key "find file")
-    "fe" '(consult-recent-file :which-key "recent files")
-    
-    "b"  '(:ignore t :which-key "buffers")
-    "bb" '(consult-buffer :which-key "switch buffer")
-    "bn" '(next-buffer :which-key "next buffer")
-    "bp" '(previous-buffer :which-key "previous buffer")
-    "bk" '(kill-buffer :which-key "kill buffer"))
-
-  (general-define-key
-   "M-o" 'ace-window
-   "C-c C-/" 'consult-ripgrep))
+;; Ensure restart-emacs command exists
+(use-package restart-emacs)
 
 
 
@@ -118,11 +87,7 @@ _q_: quit
   ("c" clear-rectangle)
   ("q" nil))
 
-;; Keybindings
-(global-set-key (kbd "C-c j") 'hydra-scroll/body)
-(global-set-key (kbd "C-c C-w") 'hydra-window/body)
-(global-set-key (kbd "C-c z") 'hydra-zoom/body)
-(global-set-key (kbd "C-c r") 'hydra-rectangle/body)
+;; Note: Hydras are bound under Meow's leader (SPC) in init-meow.el
 
 (provide 'init-keybindings)
 

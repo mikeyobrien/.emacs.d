@@ -5,6 +5,9 @@
 
 ;;; Code:
 
+;; Prefer newer source over stale byte-compiled files
+(setq load-prefer-newer t)
+
 ;; Load paths and custom file
 (add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
 (setq custom-file (locate-user-emacs-file "custom.el"))
@@ -20,6 +23,7 @@
 (require 'init-package)
 (require 'init-system)
 (require 'init-ui)
+(require 'init-tabs)
 (require 'init-keybindings)
 
 ;; Modal editing (set to nil to disable)

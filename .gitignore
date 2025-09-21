@@ -25,3 +25,13 @@ custom.el
 
 # Secrets file (contains API keys)
 secrets.el
+
+# Org-roam database files
+/org-roam.db
+/org-roam.db-wal
+/org-roam.db-shm
+ 
+# Local Emacs state files
+/bookmarks
+/places
+/history

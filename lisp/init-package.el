@@ -19,6 +19,8 @@
 
 (require 'use-package)
 (setq use-package-always-ensure t)
+;; Defer packages by default; explicitly demand essentials
+(setq use-package-always-defer t)
 
 (provide 'init-package)
 ;;; init-package.el ends here

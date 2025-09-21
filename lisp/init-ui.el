@@ -7,12 +7,14 @@
 
 ;; Theme and modeline
 (use-package doom-themes
+  :demand t
   :config
-  (load-theme 'doom-ayu-dark t))
+  (load-theme 'doom-one t))
 (use-package all-the-icons
   :ensure t)
 (use-package nerd-icons)
 (use-package doom-modeline
+  :demand t
   :init
   (doom-modeline-mode 1)
   :custom
@@ -68,6 +70,13 @@
 
 (column-number-mode)
 (global-display-line-numbers-mode t)
+
+;; Smooth scrolling
+(when (fboundp 'pixel-scroll-precision-mode)
+  (pixel-scroll-precision-mode 1))
+(setq scroll-margin 4
+      scroll-conservatively 101
+      fast-but-imprecise-scrolling t)
 
 ;; Disable line numbers for some modes
 (dolist (mode '(org-mode-hook
