@@ -8,8 +8,6 @@
 ;; Ensure restart-emacs command exists
 (use-package restart-emacs)
 
-
-
 ;; Scroll hydra
 (use-package hydra
   :ensure t)
@@ -18,13 +16,15 @@
   "
 ^Scroll^
 ^------^
-_d_: scroll down (C-d)
-_u_: scroll up (C-u)
+_k_: scroll down (C-d in vim)
+_j_: scroll up (C-u in vim)
 _q_: quit
 "
-  ("d" scroll-up-command)
-  ("u" scroll-down-command)
+  ("j" (lambda () (interactive) (scroll-up-command (/ (window-body-height) 2))))
+  ("k" (lambda () (interactive) (scroll-down-command (/ (window-body-height) 2))))
   ("q" nil))
+
+(global-set-key (kbd "C-c w s") 'hydra-scroll/body)
 
 ;; Window management hydra
 (defhydra hydra-window (:color red :hint nil)
@@ -88,6 +88,7 @@ _q_: quit
   ("q" nil))
 
 ;; Note: Hydras are bound under Meow's leader (SPC) in init-meow.el
+
 
 (provide 'init-keybindings)
 

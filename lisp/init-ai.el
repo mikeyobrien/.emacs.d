@@ -21,6 +21,8 @@
 
 
 (use-package gptel
+  :ensure t
+  :demand t
   :bind
   (("C-c l l" . gptel)
    ("C-c l r" . gptel-rewrite)
@@ -44,6 +46,7 @@
       :models '(gpt-5-chat-latest
                 google/gemini-2.5-flash
                 google/gemini-2.0-flash
+		gpt-oss:120b
                 gpt-oss:20b
                 deepseek/deepseek-chat-v3.1)))
   
@@ -94,13 +97,21 @@
          (let ((inhibit-read-only t))
            (erase-buffer)
            (insert response))
-         (org-mode)
+         (special-mode)
          (display-buffer (current-buffer)
-                         '((display-buffer-in-side-window)
+                         `((display-buffer-in-side-window)
                            (side . bottom)
-                           (window-height . fit-window-to-buffer))))))))
+                           (window-height . ,#'fit-window-to-buffer))))))))
 
-  (defun mov/gptel-mode-auto ()
+(defun mov/gptel-insert ()
+  (interactive)
+  (set-mark (point))
+  (insert "\n")
+  (exchange-point-and-mark)
+  (gptel-rewrite))
+  
+
+(defun mov/gptel-mode-auto ()
   "Ensure that this file opens with `gptel-mode' enabled."
   (save-excursion
     (let ((enable-local-variables t))  ; Ensure we can modify local variables
@@ -120,23 +131,43 @@
   (setq gptel-backend gptel-openwebui
         gptel-model 'gpt-5-chat-latest
         gptel-default-mode 'org-mode
-        gptel-temperature 0.2
-        gptel-max-tokens 8000)
+        gptel-disabled-modes '(markdown-mode))
   (add-hook 'gptel-mode-hook
             (lambda ()
               (setenv "AWS_PROFILE" "cline"))))
+
+;; Backend switching functions (outside use-package)
+(defun gptel-switch-to-openwebui ()
+  "Switch to Open WebUI backend."
+  (interactive)
+  (setq gptel-backend gptel-openwebui
+        gptel-model 'gpt-5-chat-latest)
+  (message "Switched to Open WebUI backend"))
+
+(defun gptel-switch-to-bedrock ()
+  "Switch to AWS Bedrock backend."
+  (interactive)
+  (setq gptel-backend gptel-bedrock
+        gptel-model 'claude-sonnet-4-20250514)
+  (message "Switched to AWS Bedrock backend"))
+
+(defun gptel-switch-backend ()
+  "Toggle between Open WebUI and AWS Bedrock backends."
+  (interactive)
+  (if (eq gptel-backend gptel-openwebui)
+      (gptel-switch-to-bedrock)
+    (gptel-switch-to-openwebui)))
 
 ;; MCP (Model Context Protocol)
 (use-package mcp
   :ensure t
   :after gptel
   :config
-  (let* ((filesystem-root "/Users/mobrienv/workplace/")
-         (servers (list (cons "fetch" '(:command "uvx" :args ("mcp-server-fetch"))))))
-    (when (file-directory-p filesystem-root)
-      (push (cons "filesystem"
-                  `(:command "npx" :args ("-y" "@modelcontextprotocol/server-filesystem" ,filesystem-root)))
-            servers))
+  (let* ((filesystem-root "/Users/mobrienv/")
+         (servers (list (cons "fetch" '(:command "uvx" :args ("mcp-server-fetch")))
+			(cons "builder-mcp" '(:command "builder-mcp"))
+                        (cons "filesystem"
+                              `(:command "npx" :args ("-y" "@modelcontextprotocol/server-filesystem" ,filesystem-root))))))
     (setq mcp-hub-servers servers))
   (require 'mcp-hub)
   :hook (after-init . mcp-hub-start-all-server))
@@ -153,6 +184,7 @@
 (define-key ai-map (kbd "s") 'gptel-switch-backend)
 (define-key ai-map (kbd "o") 'gptel-switch-to-openwebui)
 (define-key ai-map (kbd "b") 'gptel-switch-to-bedrock)
+(define-key ai-map (kbd "?") 'gptel-quick)
 
 ;;
 ;; Display and window routing for GPTel buffers
@@ -178,13 +210,15 @@
     (buffer-substring-no-properties (point-min) (point-max))))
 
 (defun mov/gptel-explain-region ()
-  "Explain the selected code/text or current buffer."
+  "Explain the selected code/text or current buffer and show result in minibuffer."
   (interactive)
   (let ((content (mov/gptel--region-or-buffer-string)))
     (gptel-request
      (format "Explain the following content clearly and concisely.\n\n%s" content)
      :system "You are a senior engineer. Provide a precise, succinct explanation, include gotchas and edge cases when relevant."
-     :buffer (get-buffer-create "*gptel-explain*"))))
+     :callback (lambda (response)
+                 (when response
+                   (message "%s" response))))))
 
 (defun mov/gptel-docstring-region ()
   "Write docstrings/comments for the selected code or buffer."
@@ -245,58 +279,6 @@
        :buffer (get-buffer-create "*gptel-eww*"))))
   (define-key ai-map (kbd "S") #'mov/gptel-eww-summarize))
 
-;;
-;; Model and temperature toggles
-;;
-(defun mov/gptel-toggle-fast-quality ()
-  "Toggle between fast and high-quality models for current backend."
-  (interactive)
-  (cond
-   ((eq gptel-backend gptel-openwebui)
-    (setq gptel-model (if (eq gptel-model 'gpt-5-chat-latest)
-                          'google/gemini-2.5-flash
-                        'gpt-5-chat-latest))
-    (message "OpenWebUI model: %s" gptel-model))
-   ((eq gptel-backend gptel-bedrock)
-    (setq gptel-model (if (memq gptel-model '(claude-sonnet-4-20250514))
-                          'claude-3-5-sonnet-latest
-                        'claude-sonnet-4-20250514))
-    (message "Bedrock model: %s" gptel-model))
-   (t (message "Unknown backend; no toggle applied"))))
-
-(defun mov/gptel-bump-temperature ()
-  "Toggle temperature between focused and creative."
-  (interactive)
-  (setq gptel-temperature (if (< (or gptel-temperature 0.2) 0.5) 0.7 0.2))
-  (message "gptel-temperature: %.1f" gptel-temperature))
-
-(define-key ai-map (kbd "q") #'mov/gptel-toggle-fast-quality)
-(define-key ai-map (kbd "t") #'mov/gptel-bump-temperature)
-
-;; Removed: post-hoc mutation of Bedrock backend (caused listp errors).
-
-;;
-;; Simple pre-send guard for expensive settings
-;;
-(defun mov/gptel--expensive-model-p (model)
-  (memq model '(gpt-5-chat-latest claude-sonnet-4-20250514 claude-3-5-sonnet-latest)))
-
-(defun mov/gptel-send-guard (orig-fun &rest args)
-  "Warn when using expensive settings or very large inputs before sending."
-  (let* ((model (and (boundp 'gptel-model) gptel-model))
-         (chars (buffer-size))
-         (too-long (> chars 200000))
-         (expensive (mov/gptel--expensive-model-p model))
-         (huge-max (and (boundp 'gptel-max-tokens) (> (or gptel-max-tokens 0) 12000))))
-    (if (and (or expensive huge-max too-long)
-             (not (yes-or-no-p (format "Send with model=%s, tokens=%s, size=%s chars? "
-                                       model gptel-max-tokens chars))))
-        (message "Send canceled by user")
-      (apply orig-fun args))))
-
-(with-eval-after-load 'gptel
-  (when (fboundp 'gptel-send)
-    (advice-add 'gptel-send :around #'mov/gptel-send-guard)))
 
 ;;
 ;; Per-project system prompt loader (AGENTS.md, etc.)
@@ -355,36 +337,7 @@
 ;;
 (require 'transient)
 
-(defvar mov/gptel-quick-models
-  '((openwebui . ((quality . gpt-5-chat-latest)
-                  (fast    . google/gemini-2.5-flash)))
-    (bedrock   . ((quality . claude-3-5-sonnet-latest)
-                  (fast    . claude-3-5-haiku-latest))))
-  "Quick model presets by backend and intent (quality/fast).")
 
-(defun mov/gptel--backend-key ()
-  (cond ((and (boundp 'gptel-openwebui) (eq gptel-backend gptel-openwebui)) 'openwebui)
-        ((and (boundp 'gptel-bedrock)   (eq gptel-backend gptel-bedrock))   'bedrock)
-        (t nil)))
-
-(defun mov/gptel-set-quick-model (which)
-  "Set model to quick preset WHICH (:fast or :quality) for current backend."
-  (interactive)
-  (let* ((bk (mov/gptel--backend-key))
-         (entry (cdr (assq bk mov/gptel-quick-models)))
-         (model (cdr (assq (intern (substring (symbol-name which) 1)) entry))))
-    (if model
-        (progn (setq gptel-model model)
-               (message "Set model to %s (%s)" model bk))
-      (message "No quick model mapped for %s/%s" bk which))))
-
-(defun mov/gptel-set-fast-model ()
-  (interactive)
-  (mov/gptel-set-quick-model :fast))
-
-(defun mov/gptel-set-quality-model ()
-  (interactive)
-  (mov/gptel-set-quick-model :quality))
 
 (transient-define-prefix mov/gptel-transient ()
   "AI actions menu."
@@ -403,8 +356,6 @@
    ("o" "OpenWebUI"      gptel-switch-to-openwebui)
    ("b" "Bedrock"        gptel-switch-to-bedrock)
    ("q" "Toggle fast/quality" mov/gptel-toggle-fast-quality)
-   ("f" "Set fast model" mov/gptel-set-fast-model)
-   ("Q" "Set quality model" mov/gptel-set-quality-model)
    ("t" "Toggle temperature" mov/gptel-bump-temperature)]
   ["Context & Files"
    ("A" "Attach from Dired" mov/gptel-add-files-from-dired)
@@ -472,6 +423,175 @@ heuristic name when GPTel is unavailable. Commands are non-blocking."
                    (with-current-buffer buf
                      (rename-buffer (generate-new-buffer-name final) t)
                      (message "Renamed: %s" (buffer-name)))))))))))))
+
+;; gptel-quick
+(require 'thingatpt)
+
+(declare-function pdf-view-active-region-p "pdf-view")
+(declare-function pdf-view-active-region-text "pdf-view")
+
+(defcustom gptel-quick-display (and (fboundp 'posframe-workable-p)
+                                    'posframe)
+  "How to display `gptel-quick' results.
+
+Set to `posframe' to use posframe, if available.  Any other value
+will cause the result to be displayed in the echo area."
+  :type '(choice
+          (const :tag "In posframe" posframe)
+          (const :tag "Echo area" nil))
+  :group 'gptel)
+
+(defvar gptel-quick-system-message
+  (lambda (count)
+    (format "Explain in %d words or fewer." count))
+  "System message for `gptel-quick'.  It is a function called with
+one argument, the desired word count -- see
+`gptel-quick-word-count'.
+
+WARNING: This variable is experimental and the calling convention is
+subject to change in the future.")
+
+(defvar gptel-quick-word-count 12
+  "Approximate word count of LLM summary.")
+(defvar gptel-quick-timeout 10
+  "Time in seconds before dismissing the summary.")
+(defvar gptel-quick-use-context nil
+  "Whether to use gptel's active context.
+
+This can include other regions, buffers or files added by
+`gptel-add'.")
+(defvar gptel-quick-backend nil
+  "Set `gptel-quick-backend' to use a dedicated model. Require
+`gptel-quick-model' to be configured.")
+(defvar gptel-quick-model nil
+  "Set `gptel-quick-model' to use a dedicated model. Must be one of
+`gptel-quick-backend''s models. Require `gptel-quick-backend' to
+be configured.")
+
+;;;###autoload
+(defun gptel-quick (query-text &optional count)
+  "Explain or summarize region or thing at point with an LLM.
+
+QUERY-TEXT is the text being explained.  COUNT is the approximate
+word count of the response."
+  (interactive
+   (list (cond
+          ((use-region-p) (buffer-substring-no-properties (region-beginning)
+                                                          (region-end)))
+          ((and (derived-mode-p 'pdf-view-mode)
+                (pdf-view-active-region-p))
+           (mapconcat #'identity (pdf-view-active-region-text) "\n\n"))
+          (t (thing-at-point 'sexp)))
+         current-prefix-arg))
+
+  (when (xor gptel-quick-backend gptel-quick-model)
+    (error "gptel-quick-backend and gptel-quick-model must be both set or unset"))
+
+  (let* ((count (or count gptel-quick-word-count))
+         (gptel-max-tokens (floor (+ (sqrt (length query-text))
+                                     (* count 2.5))))
+         (gptel-use-curl)
+         (gptel-use-context (and gptel-quick-use-context 'system))
+         (gptel-backend (or gptel-quick-backend gptel-backend))
+         (gptel-model (or gptel-quick-model gptel-model)))
+    (gptel-request query-text
+      :system (funcall gptel-quick-system-message count)
+      :context (list query-text count
+                     (posn-at-point (and (use-region-p) (region-beginning))))
+      :callback #'gptel-quick--callback-posframe)))
+
+;; From (info "(elisp) Accessing Mouse")
+(defun gptel-quick--frame-relative-coordinates (position)
+  "Return frame-relative coordinates from POSITION.
+
+POSITION is assumed to lie in a window text area."
+  (let* ((x-y (posn-x-y position))
+         (window (posn-window position))
+         (edges (window-inside-pixel-edges window)))
+    (cons (+ (or (car x-y) 0) (car edges))
+          (+ (or (cdr x-y) 0) (cadr edges)))))
+
+(declare-function posframe-show "posframe")
+(declare-function posframe-hide "posframe")
+
+(defun gptel-quick--callback-posframe (response info)
+  "Show RESPONSE appropriately, in a popup if possible.
+
+Uses the buffer context from INFO.  Set up a transient map for
+quick actions on the popup."
+  (pcase response
+    ('nil (message "Response failed with error: %s" (plist-get info :status)))
+    ((pred stringp)
+     (pcase-let ((`(,query ,count ,pos) (plist-get info :context)))
+       (gptel-quick--update-posframe response pos)
+       (cl-flet ((clear-response () (interactive)
+                   (and (eq gptel-quick-display 'posframe)
+                        (fboundp 'posframe-hide)
+                        (posframe-hide " *gptel-quick*")))
+                 (more-response  () (interactive)
+                   (gptel-quick--update-posframe
+                    "...generating longer summary..." pos)
+                   (gptel-quick query (* count 4)))
+                 (copy-response  () (interactive) (kill-new response)
+                   (message "Copied summary to kill-ring."))
+                 (create-chat () (interactive)
+                   (gptel (generate-new-buffer-name "*gptel-quick*") nil
+                          (concat query "\n\n"
+                                  (propertize response 'gptel 'response) "\n\n")
+                          t)))
+         (set-transient-map
+          (let ((map (make-sparse-keymap)))
+            (define-key map [remap keyboard-quit] #'clear-response)
+            (define-key map (kbd "+") #'more-response)
+            (define-key map [remap kill-ring-save] #'copy-response)
+            (define-key map (kbd "M-RET") #'create-chat)
+            map)
+          nil #'clear-response nil gptel-quick-timeout))))
+    (`(tool-call . ,tool-calls)
+     (gptel--display-tool-calls tool-calls info 'minibuffer))))
+
+(defun gptel-quick--update-posframe (response pos)
+  "Show RESPONSE at in a posframe (at POS) or the echo area."
+  (if (and (display-graphic-p)          ;posframe is not terminal-compatible
+           (eq gptel-quick-display 'posframe)
+           (require 'posframe nil t))
+      (let ((fringe-indicator-alist nil)
+            (coords) (poshandler))
+        (if (and pos (not (equal (posn-x-y pos) '(0 . 0))))
+            (setq coords (gptel-quick--frame-relative-coordinates pos))
+          (setq poshandler #'posframe-poshandler-window-center))
+        (posframe-show " *gptel-quick*"
+                       :string response
+                       :position coords
+                       :border-width 2
+                       :border-color (face-attribute 'vertical-border :foreground)
+                       :initialize #'visual-line-mode
+                       :poshandler poshandler
+                       :left-fringe 8
+                       :right-fringe 8
+                       :min-width 36
+                       :max-width fill-column
+                       :min-height 1
+                       :timeout gptel-quick-timeout))
+    (message response)))
+
+(define-key ai-map (kbd "?") #'gptel-quick)
+
+(defun mov/gptel-complete (prompt)
+  "Send PROMPT to GPTel and insert response at point."
+  (interactive (list (read-string "Complete with AI: ")))
+  (when (string-empty-p prompt)
+    (user-error "A prompt is required"))
+  (gptel-request
+   prompt
+   :callback
+   (lambda (response _info)
+     (when (and response (stringp response))
+       (save-excursion
+         (insert response))))))
+
+;; optional binding
+(define-key ai-map (kbd "C") #'mov/gptel-complete)
 
 (provide 'init-ai)
 ;;; init-ai.el ends here

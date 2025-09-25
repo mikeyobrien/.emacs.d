@@ -41,11 +41,6 @@
   (define-key eshell-mode-map (kbd "C-r") #'consult-history)
 
   ;; Only define Evil-specific bindings if Evil is present
-  (when (featurep 'evil)
-    (evil-define-key '(normal insert visual) eshell-mode-map (kbd "<home>") 'eshell-bol)
-    (when (fboundp 'evil-normalize-keymaps)
-      (evil-normalize-keymaps)))
-
   (setq eshell-history-size         10000
         eshell-buffer-maximum-lines 10000
         eshell-hist-ignoredups t
@@ -60,43 +55,15 @@
 
 ;; Terminal emulator
 (use-package eat
-  :bind
-  ("C-c t" . eat)
   :hook
   ((eat-mode . my/eat-disable-line-numbers)
-   (eat-mode . my/eat-setup-meow))
+   (eat-mode . my/eat-setup-meow)
+   (eshell-mode . eat-eshell-mode))
   :config
   (setq eat-enable-mouse nil
         eat-kill-buffer-on-exit t)
 
-  (define-key eat-mode-map (kbd "C-c C-c") #'meow-normal-mode)
-  (define-key eat-mode-map (kbd "C-c C-i") #'meow-insert-mode)
-  (define-key eat-mode-map (kbd "C-c C-v") #'meow-visual-mode)
-  (define-key eat-mode-map (kbd "C-c C-e") #'meow-insert-exit)
-  ;; Smart rename via GPTel
-  (define-key eat-mode-map (kbd "C-c C-n") #'mov/gptel-smart-rename-terminal)
-
-  (with-eval-after-load 'meow
-    (defun my/eat--meow-enter-insert ()
-      (when (derived-mode-p 'eat-mode)
-        (eat-char-mode)))
-
-    (defun my/eat--meow-exit-insert ()
-      (when (derived-mode-p 'eat-mode)
-        (eat-emacs-mode)))
-
-    (defun my/eat--teardown-meow-hooks ()
-      (remove-hook 'meow-insert-enter-hook #'my/eat--meow-enter-insert t)
-      (remove-hook 'meow-insert-exit-hook #'my/eat--meow-exit-insert t)
-      (remove-hook 'kill-buffer-hook #'my/eat--teardown-meow-hooks t))
-
-    (defun my/eat--setup-meow-hooks ()
-      (add-hook 'meow-insert-enter-hook #'my/eat--meow-enter-insert nil t)
-      (add-hook 'meow-insert-exit-hook #'my/eat--meow-exit-insert nil t)
-      (add-hook 'kill-buffer-hook #'my/eat--teardown-meow-hooks nil t)
-      (if (bound-and-true-p meow-insert-mode)
-          (my/eat--meow-enter-insert)
-        (my/eat--meow-exit-insert)))))
+  (define-key eat-mode-map (kbd "C-c C-n") #'mov/gptel-smart-rename-terminal))
 
 (defun my/eat-disable-line-numbers ()
   (interactive)
@@ -113,6 +80,20 @@
   (when (boundp 'vterm-mode-map)
     (define-key vterm-mode-map (kbd "C-c C-n") #'mov/gptel-smart-rename-terminal)))
 
+
+(use-package pdf-tools
+  :ensure t
+  :config
+  (pdf-tools-install)     ;; builds and activates
+  (setq-default pdf-view-display-size 'fit-page)
+  ;; open PDFs in pdf-view-mode instead of doc-view
+  (add-to-list 'auto-mode-alist '("\\.pdf\\'" . pdf-view-mode)))
+
+;; Optional extras
+(use-package saveplace-pdf-view
+  :after pdf-tools
+  :config
+  (save-place-mode 1))   ;; remembers last viewed page
 
 
 (provide 'init-misc)

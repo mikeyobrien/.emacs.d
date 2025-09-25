@@ -66,17 +66,14 @@
 (when (display-graphic-p)
   (scroll-bar-mode -1))
 
+;; Disable GUI dialogs - use minibuffer instead
+(setq use-dialog-box nil
+      use-file-dialog nil)
+
 (setq ring-bell-function 'ignore)
 
 (column-number-mode)
 (global-display-line-numbers-mode t)
-
-;; Smooth scrolling
-(when (fboundp 'pixel-scroll-precision-mode)
-  (pixel-scroll-precision-mode 1))
-(setq scroll-margin 4
-      scroll-conservatively 101
-      fast-but-imprecise-scrolling t)
 
 ;; Disable line numbers for some modes
 (dolist (mode '(org-mode-hook

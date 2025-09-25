@@ -8,8 +8,6 @@
 ;; Projectile
 (use-package projectile
   :ensure t
-  :bind
-  ("C-c p" . 'projectile-command-map)
   :init
   (progn
     (setq projectile-file-exists-remote-cache-expire nil)
