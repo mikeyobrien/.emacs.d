@@ -22,6 +22,16 @@
   :init (which-key-mode 1)
   :custom (which-key-idle-delay 0.4))
 
+;; Visual undo tree
+(use-package vundo
+  :bind ("C-x u" . vundo))
+
+;; Better help buffers
+(use-package helpful
+  :bind (("C-h f" . helpful-callable)
+         ("C-h v" . helpful-variable)
+         ("C-h k" . helpful-key)))
+
 ;; Disable mouse
 (use-package disable-mouse)
 
@@ -82,7 +92,7 @@
 
 
 (use-package pdf-tools
-  :ensure t
+  
   :config
   (pdf-tools-install)     ;; builds and activates
   (setq-default pdf-view-display-size 'fit-page)

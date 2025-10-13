@@ -7,7 +7,7 @@
 
 ;; Projectile
 (use-package projectile
-  :ensure t
+  
   :init
   (progn
     (setq projectile-file-exists-remote-cache-expire nil)
@@ -39,6 +39,17 @@
 ;; Consult integration for Projectile (keeps Vertico/Consult stack consistent)
 (use-package consult-projectile
   :after (projectile consult))
+
+;; Custom function to run eat terminal at bottom
+(defun projectile-run-eat ()
+  "Run eat terminal in project root at bottom of window."
+  (interactive)
+  (let ((default-directory (projectile-project-root)))
+    (let ((display-buffer-alist
+           '(("\\*eat\\*"
+              (display-buffer-at-bottom)
+              (window-height . 0.3)))))
+      (eat))))
 
 ;; Magit
 (use-package magit

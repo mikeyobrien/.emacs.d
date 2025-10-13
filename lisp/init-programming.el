@@ -17,7 +17,7 @@
   :ensure nil)
 
 (use-package flymake-flycheck
-  :ensure t
+  
   :init
   (add-hook 'flymake-mode-hook 'flymake-flycheck-auto)
   (add-hook 'prog-mode-hook 'flymake-mode)
@@ -36,11 +36,11 @@
 
 ;; Nix
 (use-package nix-mode
-  :ensure t)
+  )
 
 ;; Markdown (modern setup)
 (use-package markdown-mode
-  :ensure t
+  
   :mode (("README\\.md\\'" . gfm-mode)
          ("\\.md\\'" . markdown-mode)
          ("\\.markdown\\'" . markdown-mode))
@@ -77,7 +77,7 @@
 ;; Emacs Lisp
 
 (use-package elisp-slime-nav
-  :ensure t
+  
   :hook (emacs-lisp-mode . elisp-slime-nav-mode)
   :config
   (add-hook 'emacs-lisp-mode-hook (lambda () (setq mode-name "ELisp"))))

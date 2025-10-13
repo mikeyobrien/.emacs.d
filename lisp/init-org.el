@@ -78,7 +78,8 @@
 
     
   :bind (("C-c n s" . mov/search-org)
-	 ("C-c n n" . mov/open-org-notes))
+	 ("C-c n n" . mov/open-org-notes)
+	 ("C-c n e" . org-tree-to-indirect-buffer))
   :config
   ;; Enable tempo for <s TAB expansion
   (require 'org-tempo)
@@ -130,9 +131,9 @@
 
 ;; Org-roam for networked thought
 (use-package org-roam
-  :ensure t
+  
   :custom
-  (org-roam-directory (file-truename (expand-file-name "roam" org-directory)))
+  (org-roam-directory (expand-file-name "roam" org-directory))
 
   :bind (("C-c n l" . org-roam-buffer-toggle)
          ("C-c n f" . org-roam-node-find)

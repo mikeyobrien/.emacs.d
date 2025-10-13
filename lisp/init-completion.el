@@ -20,6 +20,12 @@
   :init
   (marginalia-mode))
 
+;; Icons in completion
+(use-package nerd-icons-completion
+  :after marginalia
+  :config
+  (nerd-icons-completion-mode))
+
 ;; Corfu (in-buffer completion)
 (use-package corfu
   :demand t
@@ -46,14 +52,14 @@
 
 ;; Embark (contextual actions)
 (use-package embark
-  :ensure t
+  
   :bind
   (("C-.". embark-act)
    ("M-.". embark-dwim)
    ("C-,". embark-act-all)))
 
 (use-package embark-consult
-  :ensure t)
+  )
 
 ;; Example configuration for Consult
 (use-package consult

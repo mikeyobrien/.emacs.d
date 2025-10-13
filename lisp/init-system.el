@@ -22,7 +22,7 @@
 ;; Terminal emulator - prefer EAT globally; keep vterm only on G14
 (when is-g14-host
   (use-package vterm
-    :ensure t
+    
     :hook ((vterm-mode . (lambda () (display-line-numbers-mode -1)))
            (vterm-mode . (lambda ()
                            (setq-local cursor-type '(bar . 2)))))

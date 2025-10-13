@@ -4,8 +4,11 @@
 ;; Meow modal editing configuration
 
 ;;; Code:
+
+(require 'init-hydras)
+
 (use-package meow
-  :ensure t
+  
   :demand t
   :init
   (unbind-key "C-c b")
@@ -29,10 +32,23 @@
      '("f f" . find-file)
      '("f r" . consult-recent-file)
      '("f s" . save-buffer)
+     '("f D" . delete-file)
+     '("f R" . rename-file)
+     '("f c" . copy-file)
      '("b b" . consult-buffer)
      '("b k" . kill-buffer)
      '("b n" . next-buffer)
      '("b p" . previous-buffer)
+     '("b i" . ibuffer)
+     '("b r" . revert-buffer)
+     '("h f" . helpful-callable)
+     '("h v" . helpful-variable)
+     '("h k" . helpful-key)
+     '("h m" . describe-mode)
+     '("u u" . vundo)
+     '("B b" . bookmark-jump)
+     '("B s" . bookmark-set)
+     '("B l" . bookmark-bmenu-list)
      '("w w" . ace-window)
      '("w v" . split-window-right)
      '("w s" . split-window-below)
@@ -47,8 +63,7 @@
      '("p p" . projectile-switch-project)
      '("p a" . projectile-add-known-project)
      '("p f" . project-find-file)
-     '("p t" . projectile-run-vterm)
-     '("p T" . projectile-run-vterm-other-window)
+     '("p t" . projectile-run-eat)
      '("p b" . consult-project-buffer)
      '("p s" . consult-ripgrep)
      '("p S" . consult-projectile)
@@ -65,6 +80,8 @@
      '("n r d t" . org-roam-dailies-capture-today)
      '("z z" . hydra-zoom/body)
      '("r r" . hydra-rectangle/body)
+     '("r s" . copy-to-register)
+     '("r i" . insert-register)
      '("q q" . save-buffers-kill-terminal)
      '("q r" . restart-emacs)
      '("q R" . reload-emacs-config))
@@ -155,7 +172,13 @@
   (meow-setup-indicator)
   (add-hook 'meow-insert-mode-hook (lambda () (setq cursor-type '(bar . 2))))
   (add-hook 'meow-normal-mode-hook (lambda () (setq cursor-type 'box)))
-  (meow-global-mode 1))
+  (meow-global-mode 1)
+  
+  ;; Terminal integration - use insert mode by default
+  (add-to-list 'meow-mode-state-list '(eat-mode . insert))
+  (add-to-list 'meow-mode-state-list '(vterm-mode . insert))
+  (add-to-list 'meow-mode-state-list '(term-mode . insert))
+  (add-to-list 'meow-mode-state-list '(eshell-mode . insert)))
 
 (provide 'init-meow)
 
