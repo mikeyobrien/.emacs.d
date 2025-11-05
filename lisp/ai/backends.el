@@ -7,8 +7,16 @@
 
 (require 'gptel)
 
+;; Define variables for API keys
+(defvar openwebui-api-key nil
+  "API key for OpenWebUI backend.")
+
 ;; Load secrets (contains API keys)
-(load (expand-file-name "secrets.el" user-emacs-directory) t)
+(let ((secrets-file (expand-file-name "secrets.el" user-emacs-directory)))
+  (if (file-exists-p secrets-file)
+      (load secrets-file)
+    (warn "secrets.el not found - AI backends may not work properly.
+Create secrets.el with your API keys (see secrets.el.example if available)")))
 
 ;; Define Open WebUI backend
 (defvar gptel-openwebui
@@ -44,7 +52,7 @@
   "Switch to AWS Bedrock backend."
   (interactive)
   (setq gptel-backend gptel-bedrock
-        gptel-model 'anthropic.claude-sonnet-4-5-20250929-v1)
+        gptel-model 'anthropic.claude-sonnet-4-5-20250929)
   (message "Switched to AWS Bedrock backend"))
 
 
