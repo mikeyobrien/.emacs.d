@@ -33,16 +33,13 @@
 (require 'init-programming)
 (require 'init-misc)
 
+(require 'init-ai)
+
 ;; Machine-specific configuration
 (require 'init-machine)
 (mov-load-machine-config)
 
-(require 'init-ai)
-(require 'init-work)
-
 (setq projectile-indexing-method 'alien)
-
-;;; init.el ends here
 
 ;; Local Variables:
 ;; coding: utf-8
